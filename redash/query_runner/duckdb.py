@@ -52,7 +52,7 @@ class Duckdb(BaseSQLQueryRunner):
     def run_query(self, query, user):
         
         dbpath = self.configuration.get('dbpath',None)
-        connection = duckdb.connect(dbpath)
+        connection = duckdb.connect(dbpath, read_only=True)
         cursor = connection.cursor()
         try:
             cursor.execute(query)
