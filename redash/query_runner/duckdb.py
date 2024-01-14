@@ -50,7 +50,6 @@ class Duckdb(BaseSQLQueryRunner):
         return list(schema.values())
 
     def run_query(self, query, user):
-        logger.info("Connecting to %s", dbpath)
         dbpath = self.configuration.get('dbpath',None)
         logger.info("Connecting to %s", dbpath)
         connection = duckdb.connect(dbpath, read_only=True)
