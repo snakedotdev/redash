@@ -23,9 +23,10 @@ class Duckdb(BaseSQLQueryRunner):
     def __init__(self, configuration):
         super(Duckdb, self).__init__(configuration)
         self._dbpath = self.configuration["dbpath"]
-        
-        
+
     def _get_tables(self, schema):
+        logger.info("Called _get_tables: %r", schema)
+
         query_table = "SHOW ALL TABLES"
         query_columns = """PRAGMA table_info('%s')"""
 
@@ -37,7 +38,7 @@ class Duckdb(BaseSQLQueryRunner):
         results = json_loads(results)
 
         for row in results["rows"]:
-            table_name = row["tbl_name"]
+            table_name = row["name"]
             schema[table_name] = {"name": table_name, "columns": []}
             results_table, error = self.run_query(query_columns % (table_name,), None)
             if error is not None:
@@ -45,7 +46,10 @@ class Duckdb(BaseSQLQueryRunner):
 
             results_table = json_loads(results_table)
             for row_column in results_table["rows"]:
-                schema[table_name]["columns"].append(row_column["name"])
+                d = {"name": row_column["name"], "type": row_column["type"]}
+                schema[table_name]["columns"].append(d)
+
+        logger.info("Introspected schema: %r", list(schema.values()))
 
         return list(schema.values())
 
@@ -69,7 +73,7 @@ class Duckdb(BaseSQLQueryRunner):
 
                 data = {"columns": columns, "rows": rows}
                 error = None
-                
+
                 json_data = json_dumps(data)
 
             else:
@@ -80,6 +84,9 @@ class Duckdb(BaseSQLQueryRunner):
             raise
         finally:
             connection.close()
+
+        if error:
+            logger.info("Query had error: %r", error)
         return json_data, error
 
 
