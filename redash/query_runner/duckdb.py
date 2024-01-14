@@ -26,8 +26,8 @@ class Duckdb(BaseSQLQueryRunner):
         
         
     def _get_tables(self, schema):
-        query_table = "SHOW ALL TABLE"
-        query_columns = "PRAGMA table_info(\"%s\")"
+        query_table = "SHOW ALL TABLES"
+        query_columns = """PRAGMA table_info('%s')"""
 
         results, error = self.run_query(query_table, None)
 
@@ -50,12 +50,16 @@ class Duckdb(BaseSQLQueryRunner):
         return list(schema.values())
 
     def run_query(self, query, user):
-        
+        logger.info("Connecting to %s", dbpath)
         dbpath = self.configuration.get('dbpath',None)
+        logger.info("Connecting to %s", dbpath)
         connection = duckdb.connect(dbpath, read_only=True)
         cursor = connection.cursor()
+        logger.info("Connected to %s", dbpath)
         try:
+            logger.info("Running %r", query)
             cursor.execute(query)
+            logger.info("Ran %r", query)
 
             if cursor.description is not None:
                 columns = self.fetch_columns([(i[0], None) for i in cursor.description])
