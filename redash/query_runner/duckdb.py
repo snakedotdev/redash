@@ -27,6 +27,7 @@ class Duckdb(BaseSQLQueryRunner):
     def _get_tables(self, schema):
         logger.info("Called _get_tables: %r", schema)
 
+        # XXX this doesn't work for views
         query_table = "SHOW ALL TABLES"
         query_columns = """PRAGMA table_info('%s')"""
 
